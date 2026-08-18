@@ -75,6 +75,27 @@
     }
     .fallback-note { color: var(--accent); font-size: 13px; margin-top: 8px; }
 
+    .examples { margin-top: 16px; }
+    .examples .label {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+    .example-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .example-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .example-chip:hover { border-color: var(--accent); color: var(--text); }
+
     .service-card {
       background: var(--surface-2);
       border: 1px solid var(--border);
@@ -114,6 +135,11 @@
     <textarea id="description" placeholder="Ex: preciso de uma API que recebe upload de imagens e processa em segundo plano"></textarea>
     <button id="submit">Sugerir arquitetura</button>
 
+    <div class="examples">
+      <div class="label">Ou parta de um exemplo</div>
+      <div class="example-chips" id="examples"></div>
+    </div>
+
     <div id="error"></div>
 
     <div id="result">
@@ -130,12 +156,63 @@
   <script>
     const API_URL = window.API_URL || "http://localhost:8000";
 
+    // Sugestões prontas — ajudam quem não sabe bem como descrever o problema
+    // a começar por um cenário comum e ajustar a partir dali.
+    const EXAMPLES = [
+      {
+        label: "Upload + processamento",
+        description: "Preciso de uma API que recebe upload de imagens e processa em segundo plano",
+      },
+      {
+        label: "E-commerce com notificação",
+        description: "Sistema de e-commerce com banco de dados relacional, carrinho de compras e notificação por e-mail no checkout",
+      },
+      {
+        label: "Alta escala + cache",
+        description: "Aplicação com milhões de registros, banco não relacional e cache para respostas rápidas",
+      },
+      {
+        label: "Site estático global",
+        description: "Site estático com distribuição global de conteúdo e baixa latência para usuários no mundo todo",
+      },
+      {
+        label: "Login e cadastro",
+        description: "API REST com sistema de login, cadastro de usuário e autenticação",
+      },
+      {
+        label: "Pipeline em lote",
+        description: "Pipeline de processamento em lote com várias etapas orquestradas e fila para desacoplar os passos",
+      },
+      {
+        label: "App containerizada",
+        description: "Aplicação containerizada com múltiplas instâncias, alta disponibilidade e balanceador de carga",
+      },
+      {
+        label: "Machine learning",
+        description: "Sistema que treina um modelo de machine learning e serve previsões via API",
+      },
+    ];
+
     const textarea = document.getElementById("description");
     const button = document.getElementById("submit");
     const resultEl = document.getElementById("result");
     const summaryEl = document.getElementById("summary");
     const servicesEl = document.getElementById("services");
     const errorEl = document.getElementById("error");
+    const examplesEl = document.getElementById("examples");
+
+    for (const example of EXAMPLES) {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "example-chip";
+      chip.textContent = example.label;
+      chip.title = example.description;
+      chip.addEventListener("click", () => {
+        textarea.value = example.description;
+        submit();
+      });
+      examplesEl.appendChild(chip);
+    }
 
     async function submit() {
       const description = textarea.value.trim();
