@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AWS Cloud Architect AI</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f1115;
+      --surface: #171a21;
+      --surface-2: #1f232c;
+      --border: #2a2f3a;
+      --text: #e8eaed;
+      --text-dim: #9aa1ac;
+      --accent: #ff9900; /* laranja AWS */
+      --accent-dim: #ffb84d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px;
+    }
+    header { text-align: center; margin-bottom: 32px; max-width: 640px; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    h1 span { color: var(--accent); }
+    p.subtitle { color: var(--text-dim); margin: 0; line-height: 1.5; }
+
+    main { width: 100%; max-width: 640px; }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      resize: vertical;
+    }
+    textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+
+    button {
+      margin-top: 12px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #1a1200;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: var(--accent-dim); }
+    button:disabled { opacity: 0.6; cursor: default; }
+
+    #result { margin-top: 28px; display: none; }
+    .summary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .fallback-note { color: var(--accent); font-size: 13px; margin-top: 8px; }
+
+    .service-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .service-card .service-name { font-weight: 700; font-size: 15px; }
+    .service-card .category {
+      display: inline-block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      margin-left: 8px;
+    }
+    .service-card .why { color: var(--text-dim); font-size: 13.5px; margin-top: 6px; line-height: 1.4; }
+
+    #error {
+      display: none;
+      margin-top: 16px;
+      color: #ff6b6b;
+      font-size: 14px;
+    }
+
+    footer { margin-top: 40px; color: var(--text-dim); font-size: 12px; text-align: center; }
+    footer a { color: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AWS Cloud <span>Architect</span> AI</h1>
+    <p class="subtitle">Descreva o problema que seu sistema precisa resolver e receba uma sugestão de arquitetura AWS.</p>
+  </header>
+
+  <main>
+    <textarea id="description" placeholder="Ex: preciso de uma API que recebe upload de imagens e processa em segundo plano"></textarea>
+    <button id="submit">Sugerir arquitetura</button>
+
+    <div id="error"></div>
+
+    <div id="result">
+      <div class="summary" id="summary"></div>
+      <div id="services"></div>
+    </div>
+  </main>
+
+  <footer>
+    Projeto de aprendizado — motor de sugestão baseado em regras.
+    <a href="https://github.com/wuemersonluz/aws-cloud-architect-ai" target="_blank">Código no GitHub</a>
+  </footer>
+
+  <script>
+    const API_URL = window.API_URL || "http://localhost:8000";
+
+    const textarea = document.getElementById("description");
+    const button = document.getElementById("submit");
+    const resultEl = document.getElementById("result");
+    const summaryEl = document.getElementById("summary");
+    const servicesEl = document.getElementById("services");
+    const errorEl = document.getElementById("error");
+
+    async function submit() {
+      const description = textarea.value.trim();
+      if (description.length < 5) {
+        showError("Descreva o problema com um pouco mais de detalhe.");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Analisando...";
+      errorEl.style.display = "none";
+
+      try {
+        const response = await fetch(`${API_URL}/recommend`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description }),
+        });
+
+        if (!response.ok) throw new Error(`Erro ${response.status}`);
+
+        const data = await response.json();
+        render(data);
+      } catch (err) {
+        showError("Não consegui falar com a API. Ela está rodando em " + API_URL + "?");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Sugerir arquitetura";
+      }
+    }
+
+    function render(data) {
+      summaryEl.innerHTML =
+        data.architecture_summary +
+        (data.used_fallback
+          ? '<div class="fallback-note">⚠ Nenhuma palavra-chave específica reconhecida — sugestão genérica abaixo.</div>'
+          : "");
+
+      servicesEl.innerHTML = "";
+      for (const s of data.matched_services) {
+        const card = document.createElement("div");
+        card.className = "service-card";
+        card.innerHTML = `
+          <span class="service-name">${s.service}</span><span class="category">${s.category}</span>
+          <div class="why">${s.why}</div>
+        `;
+        servicesEl.appendChild(card);
+      }
+
+      resultEl.style.display = "block";
+    }
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = "block";
+      resultEl.style.display = "none";
+    }
+
+    button.addEventListener("click", submit);
+    textarea.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit();
+    });
+  </script>
+</body>
+</html>
