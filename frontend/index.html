@@ -28,12 +28,40 @@
       align-items: center;
       padding: 48px 16px;
     }
-    header { text-align: center; margin-bottom: 32px; max-width: 640px; }
+    header { text-align: center; margin-bottom: 32px; max-width: 900px; }
     h1 { margin: 0 0 8px; font-size: 28px; }
     h1 span { color: var(--accent); }
     p.subtitle { color: var(--text-dim); margin: 0; line-height: 1.5; }
 
-    main { width: 100%; max-width: 640px; }
+    /* Duas colunas lado a lado: entrada à esquerda, resposta à direita.
+       Empilha em telas estreitas (ver media query no fim). */
+    .layout {
+      width: 100%;
+      max-width: 1040px;
+      display: grid;
+      grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+      gap: 28px;
+      align-items: start;
+    }
+    .panel-right {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 320px;
+    }
+    .panel-right .placeholder {
+      color: var(--text-dim);
+      font-size: 14px;
+      text-align: center;
+      padding: 60px 16px;
+      line-height: 1.6;
+    }
+    .panel-right .placeholder .icon { font-size: 28px; display: block; margin-bottom: 10px; }
+
+    @media (max-width: 780px) {
+      .layout { grid-template-columns: 1fr; }
+    }
 
     textarea {
       width: 100%;
@@ -64,7 +92,7 @@
     button:hover { background: var(--accent-dim); }
     button:disabled { opacity: 0.6; cursor: default; }
 
-    #result { margin-top: 28px; display: none; }
+    #result { display: none; }
     .summary {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -131,22 +159,29 @@
     <p class="subtitle">Descreva o problema que seu sistema precisa resolver e receba uma sugestão de arquitetura AWS.</p>
   </header>
 
-  <main>
-    <textarea id="description" placeholder="Ex: preciso de uma API que recebe upload de imagens e processa em segundo plano"></textarea>
-    <button id="submit">Sugerir arquitetura</button>
+  <div class="layout">
+    <main>
+      <textarea id="description" placeholder="Ex: preciso de uma API que recebe upload de imagens e processa em segundo plano"></textarea>
+      <button id="submit">Sugerir arquitetura</button>
 
-    <div class="examples">
-      <div class="label">Ou parta de um exemplo</div>
-      <div class="example-chips" id="examples"></div>
+      <div class="examples">
+        <div class="label">Ou parta de um exemplo</div>
+        <div class="example-chips" id="examples"></div>
+      </div>
+    </main>
+
+    <div class="panel-right">
+      <div id="error"></div>
+      <div class="placeholder" id="placeholder">
+        <span class="icon">☁️</span>
+        A sugestão de arquitetura aparece aqui — descreva o problema ao lado ou clique num exemplo.
+      </div>
+      <div id="result">
+        <div class="summary" id="summary"></div>
+        <div id="services"></div>
+      </div>
     </div>
-
-    <div id="error"></div>
-
-    <div id="result">
-      <div class="summary" id="summary"></div>
-      <div id="services"></div>
-    </div>
-  </main>
+  </div>
 
   <footer>
     Projeto de aprendizado — motor de sugestão baseado em regras.
@@ -200,6 +235,7 @@
     const servicesEl = document.getElementById("services");
     const errorEl = document.getElementById("error");
     const examplesEl = document.getElementById("examples");
+    const placeholderEl = document.getElementById("placeholder");
 
     for (const example of EXAMPLES) {
       const chip = document.createElement("button");
@@ -262,6 +298,7 @@
         servicesEl.appendChild(card);
       }
 
+      placeholderEl.style.display = "none";
       resultEl.style.display = "block";
     }
 
@@ -269,6 +306,7 @@
       errorEl.textContent = msg;
       errorEl.style.display = "block";
       resultEl.style.display = "none";
+      placeholderEl.style.display = "block";
     }
 
     button.addEventListener("click", submit);
