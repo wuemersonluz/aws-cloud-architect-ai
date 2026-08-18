@@ -43,6 +43,30 @@ def test_recommend_does_not_confuse_non_relational_with_relational():
     assert "Amazon RDS" not in services
 
 
+def test_recommend_matches_new_networking_and_security_services():
+    advisor = RuleBasedAdvisor()
+    result = advisor.recommend(
+        "Preciso de uma VPC isolada, DNS próprio e um firewall contra ataques na aplicação"
+    )
+
+    services = {s.service for s in result.matched_services}
+    assert "Amazon VPC" in services
+    assert "Amazon Route 53" in services
+    assert "AWS WAF" in services
+
+
+def test_recommend_matches_streaming_and_analytics():
+    advisor = RuleBasedAdvisor()
+    result = advisor.recommend(
+        "Sistema que ingere dados em tempo real e faz ETL para um data warehouse"
+    )
+
+    services = {s.service for s in result.matched_services}
+    assert "Amazon Kinesis" in services
+    assert "AWS Glue" in services
+    assert "Amazon Redshift" in services
+
+
 def test_recommend_falls_back_when_nothing_matches():
     advisor = RuleBasedAdvisor()
     result = advisor.recommend("blablabla xyzxyz sem sentido nenhum aqui")
