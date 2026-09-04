@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagramas e Matrizes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@500&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#EEF1F6;
+  --surface:#FFFFFF;
+  --surface-2:#F6F8FC;
+  --ink:#101B33;
+  --ink-2:#4C5771;
+  --ink-3:#7A849B;
+  --line:#D4DAE6;
+  --line-soft:#E6EAF2;
+  --accent:#2E4FA8;
+  --accent-soft:#E4EAF8;
+  --ok:#1B6E4F;
+  --ok-soft:#E2F0E9;
+  --no:#A93B2B;
+  --no-soft:#F8E6E2;
+  --fig1:#2E4FA8;
+  --fig2:#A9711A;
+  --fig3:#1C7563;
+  --shadow:0 1px 2px rgba(16,27,51,.06), 0 8px 24px -12px rgba(16,27,51,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1320;
+    --surface:#161E2E;
+    --surface-2:#1C2536;
+    --ink:#E7EBF5;
+    --ink-2:#A3AEC5;
+    --ink-3:#7C879E;
+    --line:#2D394B;
+    --line-soft:#232D3D;
+    --accent:#8FA9FF;
+    --accent-soft:#20304F;
+    --ok:#5BC08E;
+    --ok-soft:#153025;
+    --no:#EE8B78;
+    --no-soft:#38201C;
+    --fig1:#8FA9FF;
+    --fig2:#E4B15C;
+    --fig3:#57C2AC;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1320;
+  --surface:#161E2E;
+  --surface-2:#1C2536;
+  --ink:#E7EBF5;
+  --ink-2:#A3AEC5;
+  --ink-3:#7C879E;
+  --line:#2D394B;
+  --line-soft:#232D3D;
+  --accent:#8FA9FF;
+  --accent-soft:#20304F;
+  --ok:#5BC08E;
+  --ok-soft:#153025;
+  --no:#EE8B78;
+  --no-soft:#38201C;
+  --fig1:#8FA9FF;
+  --fig2:#E4B15C;
+  --fig3:#57C2AC;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  font-size:16.5px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:Archivo,"Segoe UI",system-ui,sans-serif;font-weight:700;text-wrap:balance;margin:0;letter-spacing:-.01em}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+}
+
+/* ---------- barra fixa ---------- */
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-in{
+  max-width:1000px;margin:0 auto;padding:10px 20px;
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.brand strong{font-family:Archivo,sans-serif;font-size:1rem;letter-spacing:-.01em}
+.stat{
+  font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.stat b{color:var(--ink);font-weight:500}
+.meter{width:120px;height:5px;border-radius:99px;background:var(--line-soft);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s ease}
+.btn{
+  font:600 .86rem/1 "Source Sans 3",sans-serif;
+  padding:9px 14px;border-radius:7px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);cursor:pointer;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-solid{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-solid:hover{filter:brightness(1.08);color:#fff}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ---------- estrutura ---------- */
+main{max-width:1000px;margin:0 auto;padding:34px 20px 90px}
+.hero{margin-bottom:34px;max-width:66ch}
+.hero h1{font-size:clamp(1.9rem,4.2vw,2.6rem);line-height:1.1;margin:10px 0 12px}
+.hero p{color:var(--ink-2);margin:0}
+.rule{height:1px;background:var(--line);border:0;margin:0}
+
+.guide{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin:26px 0 44px;
+}
+.guide article{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 20px 16px;box-shadow:var(--shadow);
+}
+.guide h3{font-size:1.05rem;margin-bottom:6px}
+.guide p{color:var(--ink-2);font-size:.94rem;margin:0 0 14px}
+.guide .demo{display:flex;gap:16px;align-items:center;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:14px}
+.guide .demo svg{width:150px;height:auto}
+
+section.bloco{margin-top:52px}
+.bloco > header{margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.bloco > header h2{font-size:1.5rem;margin-top:4px}
+.bloco > header p{color:var(--ink-2);margin:6px 0 0;max-width:70ch;font-size:.96rem}
+
+/* ---------- questão ---------- */
+.q{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:22px 22px 18px;margin-bottom:18px;box-shadow:var(--shadow);
+}
+.q-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:16px}
+.q-num{
+  font-family:"IBM Plex Mono",monospace;font-size:.78rem;font-weight:500;
+  color:var(--accent);background:var(--accent-soft);
+  padding:5px 9px;border-radius:6px;flex:none;font-variant-numeric:tabular-nums;
+}
+.q-ask{margin:0;font-size:1.02rem}
+.grupos{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grupos span{
+  font-family:"IBM Plex Mono",monospace;font-size:.8rem;
+  border:1px solid var(--line);background:var(--surface-2);
+  padding:5px 10px;border-radius:99px;color:var(--ink);
+}
+.matriz-wrap{display:flex;justify-content:center;padding:6px 0 18px}
+.matriz-wrap svg{width:210px;height:auto;color:var(--ink)}
+
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
+.opt{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:var(--surface-2);border:1.5px solid var(--line);border-radius:10px;
+  padding:12px 8px 8px;cursor:pointer;color:var(--ink);
+  transition:border-color .15s, background .15s, transform .1s;
+}
+.opt:hover{border-color:var(--accent);transform:translateY(-1px)}
+.opt svg{width:100%;height:auto;max-height:84px}
+.opt.cell svg{width:70px;height:70px;max-height:none}
+.opt .tag{
+  font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--ink-3);
+}
+.opt[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-checked="true"] .tag{color:var(--accent)}
+.opt[data-mark="ok"]{border-color:var(--ok);background:var(--ok-soft)}
+.opt[data-mark="ok"] .tag{color:var(--ok)}
+.opt[data-mark="no"]{border-color:var(--no);background:var(--no-soft)}
+.opt[data-mark="no"] .tag{color:var(--no)}
+.opt[data-mark="ok"]::after,.opt[data-mark="no"]::after{
+  content:attr(data-mark-label);
+  position:absolute;top:-9px;right:8px;
+  font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.06em;
+  padding:2px 7px;border-radius:99px;color:#fff;
+}
+.opt[data-mark="ok"]::after{background:var(--ok)}
+.opt[data-mark="no"]::after{background:var(--no)}
+
+.q-foot{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+.veredito{font-size:.9rem;font-weight:600}
+.veredito[data-v="ok"]{color:var(--ok)}
+.veredito[data-v="no"]{color:var(--no)}
+
+.explica{
+  margin-top:14px;border-top:1px dashed var(--line);padding-top:14px;
+  display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;
+}
+.explica[hidden]{display:none}
+.explica .fig-box{flex:none;width:190px}
+.explica .fig-box svg{width:100%;height:auto}
+.explica .txt{flex:1;min-width:240px}
+.explica .txt p{margin:0 0 10px;font-size:.94rem;color:var(--ink-2)}
+.legend{display:flex;flex-direction:column;gap:5px;margin:0;padding:0;list-style:none}
+.legend li{display:flex;align-items:center;gap:8px;font-size:.85rem}
+.legend i{width:13px;height:13px;border-radius:99px;border:3px solid currentColor;flex:none}
+.legend li:nth-child(1){color:var(--fig1)}
+.legend li:nth-child(2){color:var(--fig2)}
+.legend li:nth-child(3){color:var(--fig3)}
+.legend b{color:var(--ink);font-weight:600}
+
+.placar{
+  margin-top:46px;background:var(--surface);border:1px solid var(--line);
+  border-left:4px solid var(--accent);border-radius:12px;padding:22px 24px;box-shadow:var(--shadow);
+}
+.placar h2{font-size:1.2rem}
+.placar .linhas{display:flex;gap:28px;flex-wrap:wrap;margin-top:14px}
+.placar .linhas div{display:flex;flex-direction:column}
+.placar .num{font-family:Archivo,sans-serif;font-size:1.9rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.placar .cap{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
+
+footer.pe{margin-top:40px;color:var(--ink-3);font-size:.85rem;max-width:70ch}
+
+@media (max-width:640px){
+  .opts{grid-template-columns:repeat(3,1fr)}
+  .topbar-in{gap:10px;padding:8px 14px}
+  .meter{width:80px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><strong>Diagramas e Matrizes</strong><span class="eyebrow">treino</span></div>
+    <div class="meter" aria-hidden="true"><i id="barra"></i></div>
+    <div class="stat" id="contador"><b>0</b>/16 respondidas &middot; <b>0</b> certas</div>
+    <button class="btn" id="btn-corrigir" type="button">Corrigir tudo</button>
+    <button class="btn" id="btn-reiniciar" type="button">Recomeçar</button>
+  </div>
+</div>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow">Raciocínio figurativo &middot; 16 itens</p>
+    <h1>Treino de diagramas e matrizes</h1>
+    <p>Dois tipos de questão de teste adaptativo, no mesmo formato do original: você lê o enunciado, escolhe a figura que representa a relação e confere a explicação com o desenho comentado. Sem tempo limite — o objetivo aqui é entender a lógica antes da prova.</p>
+  </div>
+
+  <div class="guide">
+    <article>
+      <h3>Como ler um diagrama</h3>
+      <p>Os círculos representam grupos. Um círculo dentro do outro significa que todo o grupo menor pertence ao maior; círculos que se cruzam têm parte em comum; círculos separados não têm nada em comum. O tamanho desenhado <em>não</em> indica proporção.</p>
+      <div class="demo" id="demo-a"></div>
+    </article>
+    <article>
+      <h3>Como ler uma matriz</h3>
+      <p>São matrizes 3&nbsp;&times;&nbsp;3 em que as três linhas seguem a mesma regra. Descubra o que muda da esquerda para a direita (forma, tamanho, quantidade, preenchimento, giro) e aplique na linha incompleta. Havendo mais de uma resposta possível, escolha a mais simples.</p>
+      <div class="demo" id="demo-b"></div>
+    </article>
+  </div>
+
+  <section class="bloco" id="parte-1">
+    <header>
+      <p class="eyebrow">Parte 1 &middot; 10 itens</p>
+      <h2>Diagramas</h2>
+      <p>Cada item traz três grupos de coisas. Escolha o diagrama que melhor representa a relação entre eles.</p>
+    </header>
+    <div id="lista-d"></div>
+  </section>
+
+  <section class="bloco" id="parte-2">
+    <header>
+      <p class="eyebrow">Parte 2 &middot; 6 itens</p>
+      <h2>Matrizes</h2>
+      <p>Identifique o desenho que deveria ocupar o lugar do ponto de interrogação.</p>
+    </header>
+    <div id="lista-m"></div>
+  </section>
+
+  <div class="placar" id="placar">
+    <p class="eyebrow">Resultado</p>
+    <h2>Seu desempenho</h2>
+    <div class="linhas">
+      <div><span class="num" id="p-cert">0</span><span class="cap">acertos</span></div>
+      <div><span class="num" id="p-err">0</span><span class="cap">erros</span></div>
+      <div><span class="num" id="p-pend">16</span><span class="cap">sem correção</span></div>
+      <div><span class="num" id="p-taxa">—</span><span class="cap">aproveitamento</span></div>
+    </div>
+  </div>
+
+  <footer class="pe">Material de estudo próprio, feito a partir dos exemplos de instrução do teste. Os itens são inéditos e não reproduzem questões da prova real.</footer>
+</main>
+
+<script>
+/* =====================================================================
+   Desenhos — diagramas de círculos
+   Cada configuração é uma lista de círculos [cx, cy, r] no espaço 200x150.
+   A ordem dos círculos é semântica e serve de base para a legenda.
+   ===================================================================== */
+const FIG = {
+  separados3:      [[45,75,32],[108,75,24],[164,75,18]],
+  concentricos2:   [[100,75,50],[100,80,26]],
+  concentricos3:   [[100,75,58],[100,75,39],[100,75,20]],
+  nestedSep:       [[68,75,46],[68,80,23],[160,75,22]],
+  inter2Sep:       [[52,75,32],[92,75,32],[158,75,24]],
+  inter3:          [[80,60,33],[120,60,33],[100,96,33]],
+  grande2dentro:   [[70,75,52],[55,60,17],[88,90,17]],
+  grande2inter:    [[70,75,52],[58,66,22],[86,84,22]],
+  nestedInter:     [[68,75,42],[58,75,20],[138,75,34]],
+  pequenoNaInter:  [[74,75,40],[118,75,40],[96,75,14]],
+  cadeia:          [[52,75,30],[100,75,30],[148,75,30]]
+};
+
+function figSVG(id, colorido){
+  const inner = FIG[id].map((c,i)=>{
+    const cor = colorido ? 'var(--fig'+(i+1)+')' : 'currentColor';
+    return '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="'+c[2]+'" fill="none" stroke="'+cor+'" stroke-width="3"/>';
+  }).join('');
+  return '<svg viewBox="0 0 200 150" aria-hidden="true">'+inner+'</svg>';
+}
+
+/* =====================================================================
+   Desenhos — matrizes
+   ===================================================================== */
+function marca(sp, cx, cy){
+  const n = sp.n || 1;
+  if(n > 1){
+    const sz  = n === 2 ? 11 : 9;
+    const off = n === 2 ? [-14,14] : [-20,0,20];
+    return off.map(o => marca({sh:sp.sh, sz:sz, fill:sp.fill, rot:sp.rot}, cx+o, cy)).join('');
+  }
+  const s = sp.sz;
+  const pintado = !!sp.fill;
+  const attr = pintado
+    ? 'fill="currentColor" stroke="none"'
+    : 'fill="none" stroke="currentColor" stroke-width="2.6"';
+  const giro = sp.rot ? ' transform="rotate('+sp.rot+' '+cx+' '+cy+')"' : '';
+  switch(sp.sh){
+    case 'cir':
+      return '<circle cx="'+cx+'" cy="'+cy+'" r="'+s+'" '+attr+giro+'/>';
+    case 'sq':
+      return '<rect x="'+(cx-s)+'" y="'+(cy-s)+'" width="'+(2*s)+'" height="'+(2*s)+'" '+attr+giro+'/>';
+    case 'tri': {
+      const p = [cx+','+(cy-s*1.12), (cx-s*1.05)+','+(cy+s*0.82), (cx+s*1.05)+','+(cy+s*0.82)].join(' ');
+      return '<polygon points="'+p+'" stroke-linejoin="round" '+attr+giro+'/>';
+    }
+    case 'dia': {
+      const p = [cx+','+(cy-s*1.15), (cx+s*1.05)+','+cy, cx+','+(cy+s*1.15), (cx-s*1.05)+','+cy].join(' ');
+      return '<polygon points="'+p+'" stroke-linejoin="round" '+attr+giro+'/>';
+    }
+  }
+  return '';
+}
+
+function matrizSVG(cels){
+  let s = '<rect x="1.3" y="1.3" width="189.4" height="189.4" rx="3" fill="none" stroke="var(--line)" stroke-width="2.6"/>';
+  for(let i=1;i<3;i++){
+    s += '<line x1="'+(i*64)+'" y1="0" x2="'+(i*64)+'" y2="192" stroke="var(--line)" stroke-width="2.6"/>';
+    s += '<line x1="0" y1="'+(i*64)+'" x2="192" y2="'+(i*64)+'" stroke="var(--line)" stroke-width="2.6"/>';
+  }
+  cels.forEach((linha,r) => linha.forEach((sp,c) => {
+    const cx = 32 + 64*c, cy = 32 + 64*r;
+    s += sp
+      ? marca(sp, cx, cy)
+      : '<text x="'+cx+'" y="'+(cy+2)+'" text-anchor="middle" dominant-baseline="middle" '+
+        'font-family="Archivo, sans-serif" font-size="30" font-weight="700" fill="currentColor">?</text>';
+  }));
+  return '<svg viewBox="0 0 192 192" aria-hidden="true">'+s+'</svg>';
+}
+
+function celulaSVG(sp){
+  return '<svg viewBox="0 0 64 64" aria-hidden="true">'+marca(sp,32,32)+'</svg>';
+}
+
+/* =====================================================================
+   Banco de questões
+   ===================================================================== */
+const DIAGRAMAS = [
+  {
+    grupos:['mesas','móveis','jornais'],
+    certa:'nestedSep',
+    rotulos:['móveis','mesas','jornais'],
+    opcoes:['nestedSep','concentricos3','separados3','inter2Sep','grande2dentro'],
+    txt:'Toda mesa é um móvel, então o círculo das mesas fica inteiro dentro do círculo dos móveis. Jornal não é móvel nem mesa: fica em um círculo separado, sem tocar os outros.'
+  },
+  {
+    grupos:['bombons','doces','coisas de comer'],
+    certa:'concentricos3',
+    rotulos:['coisas de comer','doces','bombons'],
+    opcoes:['concentricos3','nestedSep','grande2dentro','inter2Sep','pequenoNaInter'],
+    txt:'São três grupos encaixados: todo bombom é um doce e todo doce é uma coisa de comer. Um dentro do outro, do mais amplo para o mais específico.'
+  },
+  {
+    grupos:['pássaros','animais de estimação','pedras'],
+    certa:'inter2Sep',
+    rotulos:['pássaros','animais de estimação','pedras'],
+    opcoes:['inter2Sep','grande2inter','separados3','nestedSep','cadeia'],
+    txt:'Alguns pássaros são animais de estimação e alguns não: os dois círculos se cruzam, mas nenhum contém o outro. Nenhuma pedra é pássaro nem animal de estimação, então ela fica de fora.'
+  },
+  {
+    grupos:['cães','gatos','animais'],
+    certa:'grande2dentro',
+    rotulos:['animais','cães','gatos'],
+    opcoes:['grande2dentro','grande2inter','concentricos3','inter3','nestedSep'],
+    txt:'Cães e gatos são animais, então os dois círculos ficam dentro do círculo maior. Como nenhum cão é gato, eles não se tocam.'
+  },
+  {
+    grupos:['médicos','mulheres','pessoas'],
+    certa:'grande2inter',
+    rotulos:['pessoas','médicos','mulheres'],
+    opcoes:['grande2inter','grande2dentro','inter3','concentricos3','pequenoNaInter'],
+    txt:'Médicos e mulheres são pessoas: os dois círculos ficam dentro do maior. E existem médicas — logo, eles se cruzam, sem que um contenha o outro.'
+  },
+  {
+    grupos:['árvores','plantas','alimentos'],
+    certa:'nestedInter',
+    rotulos:['plantas','árvores','alimentos'],
+    opcoes:['nestedInter','grande2inter','inter3','nestedSep','cadeia'],
+    txt:'Toda árvore é planta: um círculo dentro do outro. Parte dos alimentos é planta (verduras, grãos), então alimentos cruza o círculo das plantas — mas não chega a tocar o das árvores, porque a árvore em si não é alimento.'
+  },
+  {
+    grupos:['cavalos','peixes','aves'],
+    certa:'separados3',
+    rotulos:['cavalos','peixes','aves'],
+    opcoes:['separados3','inter3','grande2dentro','cadeia','concentricos3'],
+    txt:'Nenhum animal está em dois desses grupos ao mesmo tempo. Três círculos totalmente separados — o tamanho de cada um não importa.'
+  },
+  {
+    grupos:['violões','instrumentos musicais','objetos de madeira'],
+    certa:'pequenoNaInter',
+    rotulos:['instrumentos musicais','objetos de madeira','violões'],
+    opcoes:['pequenoNaInter','inter3','grande2inter','nestedInter','concentricos3'],
+    txt:'Há instrumentos que não são de madeira e objetos de madeira que não são instrumentos: os dois círculos se cruzam. O violão é as duas coisas ao mesmo tempo, então cabe inteiro dentro da área comum.'
+  },
+  {
+    grupos:['crianças','estudantes','aposentados'],
+    certa:'cadeia',
+    rotulos:['crianças','estudantes','aposentados'],
+    opcoes:['cadeia','inter3','separados3','grande2inter','nestedSep'],
+    txt:'Estudantes cruza com crianças e também com aposentados (há quem volte a estudar). Mas nenhuma criança é aposentada: as pontas da corrente não se tocam.'
+  },
+  {
+    grupos:['políticos','advogados','mentirosos'],
+    certa:'inter3',
+    rotulos:['políticos','advogados','mentirosos'],
+    opcoes:['inter3','pequenoNaInter','grande2inter','cadeia','inter2Sep'],
+    txt:'Nenhum grupo está contido em outro e todos os cruzamentos existem: há advogados que são políticos, políticos que mentem, advogados que mentem — e quem é as três coisas. Três círculos que se cruzam dois a dois.'
+  }
+];
+
+const MATRIZES = [
+  {
+    cels:[
+      [{sh:'sq',sz:24},{sh:'sq',sz:17},{sh:'sq',sz:11}],
+      [{sh:'tri',sz:24},{sh:'tri',sz:17},{sh:'tri',sz:11}],
+      [{sh:'cir',sz:24},{sh:'cir',sz:17},null]
+    ],
+    opcoes:[{sh:'cir',sz:11},{sh:'cir',sz:17},{sh:'cir',sz:24},{sh:'sq',sz:11},{sh:'tri',sz:11},{sh:'cir',sz:11,fill:1}],
+    ans:0,
+    regra:'Cada linha mantém a mesma forma e ela vai diminuindo da esquerda para a direita. A linha dos círculos termina no círculo pequeno, vazado como todos os outros.'
+  },
+  {
+    cels:[
+      [{sh:'sq',sz:17},{sh:'sq',sz:17},{sh:'sq',sz:17,fill:1}],
+      [{sh:'tri',sz:17},{sh:'tri',sz:17},{sh:'tri',sz:17,fill:1}],
+      [{sh:'cir',sz:17},{sh:'cir',sz:17},null]
+    ],
+    opcoes:[{sh:'cir',sz:17,fill:1},{sh:'cir',sz:17},{sh:'sq',sz:17,fill:1},{sh:'tri',sz:17,fill:1},{sh:'cir',sz:11,fill:1},{sh:'cir',sz:24,fill:1}],
+    ans:0,
+    regra:'A forma e o tamanho não mudam dentro da linha; o que muda é o preenchimento: só a terceira coluna é pintada. Falta o círculo pintado, do mesmo tamanho dos outros dois.'
+  },
+  {
+    cels:[
+      [{sh:'cir',n:1,sz:17},{sh:'cir',n:2},{sh:'cir',n:3}],
+      [{sh:'sq',n:1,sz:17},{sh:'sq',n:2},{sh:'sq',n:3}],
+      [{sh:'tri',n:1,sz:17},{sh:'tri',n:2},null]
+    ],
+    opcoes:[{sh:'tri',n:3},{sh:'tri',n:2},{sh:'sq',n:3},{sh:'cir',n:3},{sh:'tri',n:1,sz:17},{sh:'tri',n:3,fill:1}],
+    ans:0,
+    regra:'Aqui o que conta é a quantidade: um, dois, três. A forma é a mesma na linha inteira, então a célula que falta tem três triângulos vazados.'
+  },
+  {
+    cels:[
+      [{sh:'sq',sz:17},{sh:'tri',sz:17},{sh:'cir',sz:17}],
+      [{sh:'tri',sz:17},{sh:'cir',sz:17},{sh:'sq',sz:17}],
+      [{sh:'cir',sz:17},{sh:'sq',sz:17},null]
+    ],
+    opcoes:[{sh:'tri',sz:17},{sh:'sq',sz:17},{sh:'cir',sz:17},{sh:'tri',sz:17,fill:1},{sh:'dia',sz:17},{sh:'tri',sz:11}],
+    ans:0,
+    regra:'As três formas aparecem uma vez em cada linha e uma vez em cada coluna. Na última linha já saíram círculo e quadrado, e a última coluna ainda não teve triângulo: é ele que falta.'
+  },
+  {
+    cels:[
+      [{sh:'tri',sz:24},{sh:'tri',sz:24,rot:120},{sh:'tri',sz:24,rot:240}],
+      [{sh:'tri',sz:17},{sh:'tri',sz:17,rot:120},{sh:'tri',sz:17,rot:240}],
+      [{sh:'tri',sz:11},{sh:'tri',sz:11,rot:120},null]
+    ],
+    opcoes:[{sh:'tri',sz:11,rot:240},{sh:'tri',sz:11,rot:120},{sh:'tri',sz:11},{sh:'tri',sz:17,rot:240},{sh:'tri',sz:24,rot:240},{sh:'tri',sz:11,rot:240,fill:1}],
+    ans:0,
+    regra:'Duas regras ao mesmo tempo: o tamanho é constante em cada linha (grande, médio, pequeno) e o triângulo gira um terço de volta a cada coluna. Falta o triângulo pequeno na terceira posição de giro.'
+  },
+  {
+    cels:[
+      [{sh:'tri',sz:11},{sh:'cir',sz:11},{sh:'sq',sz:11}],
+      [{sh:'tri',sz:17},{sh:'cir',sz:17},{sh:'sq',sz:17}],
+      [{sh:'tri',sz:24},{sh:'cir',sz:24},null]
+    ],
+    opcoes:[{sh:'sq',sz:24},{sh:'sq',sz:17},{sh:'cir',sz:24},{sh:'tri',sz:24},{sh:'sq',sz:24,fill:1},{sh:'sq',sz:11}],
+    ans:0,
+    regra:'A coluna manda na forma (triângulo, círculo, quadrado) e a linha manda no tamanho, que cresce de cima para baixo. O cruzamento que falta é o quadrado grande.'
+  }
+];
+
+/* =====================================================================
+   Montagem e interação
+   ===================================================================== */
+const estado = [];
+
+function embaralhar(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function legendaHTML(rotulos){
+  return '<ul class="legend">' + rotulos.map(r => '<li><i></i><b>'+r+'</b></li>').join('') + '</ul>';
+}
+
+function blocoOpcoes(itens, cls){
+  return '<div class="opts" role="radiogroup" aria-label="Alternativas">' +
+    itens.map((svg,i) =>
+      '<button type="button" class="opt '+(cls||'')+'" role="radio" aria-checked="false" data-i="'+i+'" ' +
+      'aria-label="Alternativa '+(i+1)+'"><span class="tag">'+(i+1)+'</span>'+svg+'</button>'
+    ).join('') + '</div>';
+}
+
+function rodape(){
+  return '<div class="q-foot">' +
+    '<button type="button" class="btn btn-solid" data-acao="ver">Ver resposta</button>' +
+    '<span class="veredito" aria-live="polite"></span></div>';
+}
+
+function montarDiagrama(q, n){
+  const ordem = embaralhar(q.opcoes);
+  const el = document.createElement('article');
+  el.className = 'q';
+  el.innerHTML =
+    '<div class="q-head"><span class="q-num">D'+String(n).padStart(2,'0')+'</span>' +
+      '<div><p class="q-ask">Qual diagrama representa melhor a relação entre estes grupos?</p>' +
+      '<div class="grupos">'+q.grupos.map(g => '<span>'+g+'</span>').join('')+'</div></div></div>' +
+    blocoOpcoes(ordem.map(id => figSVG(id,false))) +
+    rodape() +
+    '<div class="explica" hidden><div class="fig-box">'+figSVG(q.certa,true)+'</div>' +
+      '<div class="txt"><p>'+q.txt+'</p>'+legendaHTML(q.rotulos)+'</div></div>';
+  return { el:el, certa:ordem.indexOf(q.certa) };
+}
+
+function montarMatriz(q, n){
+  const pares = embaralhar(q.opcoes.map((sp,i) => ({sp:sp, ok:i === q.ans})));
+  const el = document.createElement('article');
+  el.className = 'q';
+  el.innerHTML =
+    '<div class="q-head"><span class="q-num">M'+String(n).padStart(2,'0')+'</span>' +
+      '<div><p class="q-ask">Qual desenho completa a matriz no lugar do ponto de interrogação?</p></div></div>' +
+    '<div class="matriz-wrap">'+matrizSVG(q.cels)+'</div>' +
+    blocoOpcoes(pares.map(p => celulaSVG(p.sp)), 'cell') +
+    rodape() +
+    '<div class="explica" hidden><div class="fig-box" style="width:76px">'+celulaSVG(q.opcoes[q.ans])+'</div>' +
+      '<div class="txt"><p>'+q.regra+'</p></div></div>';
+  return { el:el, certa:pares.findIndex(p => p.ok) };
+}
+
+function ligar(item){
+  const opts = Array.from(item.el.querySelectorAll('.opt'));
+  opts.forEach(b => b.addEventListener('click', () => {
+    if(item.corrigida) return;
+    item.escolha = Number(b.dataset.i);
+    opts.forEach(o => o.setAttribute('aria-checked', o === b ? 'true' : 'false'));
+    atualizar();
+  }));
+  item.el.querySelector('[data-acao="ver"]').addEventListener('click', () => corrigir(item));
+}
+
+function corrigir(item){
+  if(item.corrigida) return;
+  item.corrigida = true;
+  const opts = Array.from(item.el.querySelectorAll('.opt'));
+  const acertou = item.escolha === item.certa;
+  opts[item.certa].dataset.mark = 'ok';
+  opts[item.certa].dataset.markLabel = 'certa';
+  if(item.escolha !== null && !acertou){
+    opts[item.escolha].dataset.mark = 'no';
+    opts[item.escolha].dataset.markLabel = 'sua';
+  }
+  const v = item.el.querySelector('.veredito');
+  if(item.escolha === null){ v.textContent = 'Sem resposta — veja a explicação.'; v.removeAttribute('data-v'); }
+  else if(acertou){ v.textContent = 'Correto.'; v.dataset.v = 'ok'; }
+  else { v.textContent = 'Não é essa.'; v.dataset.v = 'no'; }
+  item.el.querySelector('[data-acao="ver"]').remove();
+  item.el.querySelector('.explica').hidden = false;
+  atualizar();
+}
+
+function atualizar(){
+  const respondidas = estado.filter(i => i.escolha !== null).length;
+  const corrigidas  = estado.filter(i => i.corrigida);
+  const certas = corrigidas.filter(i => i.escolha === i.certa).length;
+  const erros  = corrigidas.length - certas;
+  document.getElementById('barra').style.width = (respondidas/estado.length*100)+'%';
+  document.getElementById('contador').innerHTML =
+    '<b>'+respondidas+'</b>/'+estado.length+' respondidas &middot; <b>'+certas+'</b> certas';
+  document.getElementById('p-cert').textContent = certas;
+  document.getElementById('p-err').textContent  = erros;
+  document.getElementById('p-pend').textContent = estado.length - corrigidas.length;
+  document.getElementById('p-taxa').textContent =
+    corrigidas.length ? Math.round(certas/corrigidas.length*100)+'%' : '—';
+}
+
+function construir(){
+  const listaD = document.getElementById('lista-d');
+  const listaM = document.getElementById('lista-m');
+  listaD.innerHTML = ''; listaM.innerHTML = '';
+  estado.length = 0;
+  DIAGRAMAS.forEach((q,i) => {
+    const item = montarDiagrama(q, i+1);
+    item.escolha = null; item.corrigida = false;
+    listaD.appendChild(item.el); estado.push(item); ligar(item);
+  });
+  MATRIZES.forEach((q,i) => {
+    const item = montarMatriz(q, i+1);
+    item.escolha = null; item.corrigida = false;
+    listaM.appendChild(item.el); estado.push(item); ligar(item);
+  });
+  atualizar();
+}
+
+/* exemplos das instruções */
+document.getElementById('demo-a').innerHTML =
+  figSVG('concentricos2', true) + legendaHTML(['animais','gatos']);
+document.getElementById('demo-b').innerHTML =
+  '<div style="width:130px">'+matrizSVG(MATRIZES[0].cels)+'</div>' +
+  '<div><div style="width:44px;color:var(--fig1)">'+celulaSVG(MATRIZES[0].opcoes[0])+'</div>' +
+  '<p class="eyebrow" style="margin:6px 0 0">resposta</p></div>';
+
+document.getElementById('btn-corrigir').addEventListener('click', () => estado.forEach(corrigir));
+document.getElementById('btn-reiniciar').addEventListener('click', () => {
+  construir();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+construir();
+</script>
+</body>
+</html>
