@@ -95,8 +95,8 @@ h1,h2,h3{font-family:Archivo,"Segoe UI",system-ui,sans-serif;font-weight:700;tex
   border-bottom:1px solid var(--line);
 }
 .topbar-in{
-  max-width:1000px;margin:0 auto;padding:10px 20px;
-  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  max-width:1060px;margin:0 auto;padding:10px 20px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
 }
 .brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
 .brand strong{font-family:Archivo,sans-serif;font-size:1rem;letter-spacing:-.01em}
@@ -105,11 +105,13 @@ h1,h2,h3{font-family:Archivo,"Segoe UI",system-ui,sans-serif;font-weight:700;tex
   font-variant-numeric:tabular-nums;white-space:nowrap;
 }
 .stat b{color:var(--ink);font-weight:500}
-.meter{width:120px;height:5px;border-radius:99px;background:var(--line-soft);overflow:hidden}
+.stat.prova{border:1px solid var(--line);border-radius:6px;padding:4px 9px;color:var(--ink-3)}
+.stat.prova b{color:var(--accent);letter-spacing:.04em}
+.meter{width:84px;flex:none;height:5px;border-radius:99px;background:var(--line-soft);overflow:hidden}
 .meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s ease}
 .btn{
-  font:600 .86rem/1 "Source Sans 3",sans-serif;
-  padding:9px 14px;border-radius:7px;border:1px solid var(--line);
+  font:600 .84rem/1 "Source Sans 3",sans-serif;
+  padding:9px 12px;white-space:nowrap;border-radius:7px;border:1px solid var(--line);
   background:var(--surface);color:var(--ink);cursor:pointer;
 }
 .btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -221,12 +223,15 @@ section.bloco{margin-top:52px}
 .placar .num{font-family:Archivo,sans-serif;font-size:1.9rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .placar .cap{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
 
+code{font-family:"IBM Plex Mono",monospace;font-size:.85em;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
 footer.pe{margin-top:40px;color:var(--ink-3);font-size:.85rem;max-width:70ch}
 
 @media (max-width:640px){
   .opts{grid-template-columns:repeat(3,1fr)}
-  .topbar-in{gap:10px;padding:8px 14px}
-  .meter{width:80px}
+  .topbar-in{gap:8px;padding:8px 14px}
+  .meter{display:none}
+  .brand span.eyebrow{display:none}
+  .btn{flex:1}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -237,9 +242,10 @@ footer.pe{margin-top:40px;color:var(--ink-3);font-size:.85rem;max-width:70ch}
   <div class="topbar-in">
     <div class="brand"><strong>Diagramas e Matrizes</strong><span class="eyebrow">treino</span></div>
     <div class="meter" aria-hidden="true"><i id="barra"></i></div>
-    <div class="stat" id="contador"><b>0</b>/16 respondidas &middot; <b>0</b> certas</div>
+    <div class="stat" id="contador"><b>0</b>/16 feitas &middot; <b>0</b> certas</div>
+    <div class="stat prova">prova <b id="codigo">----</b></div>
     <button class="btn" id="btn-corrigir" type="button">Corrigir tudo</button>
-    <button class="btn" id="btn-reiniciar" type="button">Recomeçar</button>
+    <button class="btn btn-solid" id="btn-novo" type="button">Novas questões</button>
   </div>
 </div>
 
@@ -248,6 +254,7 @@ footer.pe{margin-top:40px;color:var(--ink-3);font-size:.85rem;max-width:70ch}
     <p class="eyebrow">Raciocínio figurativo &middot; 16 itens</p>
     <h1>Treino de diagramas e matrizes</h1>
     <p>Dois tipos de questão de teste adaptativo, no mesmo formato do original: você lê o enunciado, escolhe a figura que representa a relação e confere a explicação com o desenho comentado. Sem tempo limite — o objetivo aqui é entender a lógica antes da prova.</p>
+    <p style="margin-top:12px">A cada vez que a página é recarregada, um teste novo é sorteado: outros enunciados, outras matrizes e outra ordem de alternativas. O código da prova fica no topo — guarde o endereço terminado em <code>#p=0000</code> para refazer exatamente a mesma prova.</p>
   </div>
 
   <div class="guide">
@@ -265,18 +272,18 @@ footer.pe{margin-top:40px;color:var(--ink-3);font-size:.85rem;max-width:70ch}
 
   <section class="bloco" id="parte-1">
     <header>
-      <p class="eyebrow">Parte 1 &middot; 10 itens</p>
+      <p class="eyebrow">Parte 1 &middot; 10 itens sorteados</p>
       <h2>Diagramas</h2>
-      <p>Cada item traz três grupos de coisas. Escolha o diagrama que melhor representa a relação entre eles.</p>
+      <p>Cada item traz três grupos de coisas. Escolha o diagrama que melhor representa a relação entre eles. A cada sorteio entra um exemplo diferente de cada tipo de relação.</p>
     </header>
     <div id="lista-d"></div>
   </section>
 
   <section class="bloco" id="parte-2">
     <header>
-      <p class="eyebrow">Parte 2 &middot; 6 itens</p>
+      <p class="eyebrow">Parte 2 &middot; 6 itens gerados</p>
       <h2>Matrizes</h2>
-      <p>Identifique o desenho que deveria ocupar o lugar do ponto de interrogação.</p>
+      <p>Identifique o desenho que deveria ocupar o lugar do ponto de interrogação. As matrizes são geradas na hora a partir de oito regras — forma, tamanho, quantidade, preenchimento e giro.</p>
     </header>
     <div id="lista-m"></div>
   </section>
@@ -377,157 +384,245 @@ function celulaSVG(sp){
 }
 
 /* =====================================================================
-   Banco de questões
+   Sorteio — cada prova tem um código de 4 dígitos.
+   O mesmo código sempre reconstrói a mesma prova (#p=1234 no endereço).
    ===================================================================== */
-const DIAGRAMAS = [
-  {
-    grupos:['mesas','móveis','jornais'],
-    certa:'nestedSep',
-    rotulos:['móveis','mesas','jornais'],
-    opcoes:['nestedSep','concentricos3','separados3','inter2Sep','grande2dentro'],
-    txt:'Toda mesa é um móvel, então o círculo das mesas fica inteiro dentro do círculo dos móveis. Jornal não é móvel nem mesa: fica em um círculo separado, sem tocar os outros.'
+let rand = Math.random;
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function rnd(n){ return Math.floor(rand()*n); }
+function sortear(a){ return a[rnd(a.length)]; }
+function embaralhar(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j = rnd(i+1); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+
+/* =====================================================================
+   Banco de diagramas — os grupos estão na ordem dos círculos da figura
+   (ver comentário de cada configuração), o que também define a legenda.
+   ===================================================================== */
+const BANCO_D = {
+  /* três círculos totalmente separados */
+  separados3: [
+    {g:['cavalos','peixes','aves']},
+    {g:['segundas-feiras','sábados','domingos']},
+    {g:['triângulos','círculos','quadrados']},
+    {g:['dentistas','geladeiras','nuvens']}
+  ],
+  /* encaixe triplo: [maior, médio, menor] */
+  concentricos3: [
+    {g:['coisas de comer','doces','bombons'], obs:'Todo bombom é um doce e todo doce é uma coisa de comer.'},
+    {g:['mamíferos','cães','poodles']},
+    {g:['plantas','flores','rosas']},
+    {g:['lugares','cidades','capitais']},
+    {g:['polígonos','retângulos','quadrados'], obs:'Todo quadrado é um retângulo, e todo retângulo é um polígono.'}
+  ],
+  /* um dentro do outro + um separado: [continente, contido, separado] */
+  nestedSep: [
+    {g:['móveis','mesas','jornais']},
+    {g:['animais','gatos','pedras']},
+    {g:['instrumentos musicais','pianos','sapatos']},
+    {g:['terras','ilhas','oceanos']},
+    {g:['profissionais de saúde','dentistas','tratores']}
+  ],
+  /* dois que se cruzam + um separado: [A, B (cruza A), separado] */
+  inter2Sep: [
+    {g:['pássaros','animais de estimação','pedras'], obs:'Alguns pássaros são animais de estimação e outros não; e há animais de estimação que não são pássaros.'},
+    {g:['professores','pais','geladeiras']},
+    {g:['atletas','estudantes','montanhas']},
+    {g:['escritores','mulheres','tijolos']}
+  ],
+  /* os três se cruzam dois a dois */
+  inter3: [
+    {g:['políticos','advogados','mentirosos']},
+    {g:['estudantes','atletas','músicos']},
+    {g:['cozinheiros','homens','brasileiros']},
+    {g:['coisas vermelhas','coisas redondas','brinquedos']}
+  ],
+  /* grande com dois separados dentro: [grande, dentro, dentro] */
+  grande2dentro: [
+    {g:['animais','cães','gatos']},
+    {g:['animais aquáticos','peixes','baleias']},
+    {g:['números inteiros','números pares','números ímpares']},
+    {g:['letras','vogais','consoantes']},
+    {g:['frutas','laranjas','bananas']}
+  ],
+  /* grande com dois que se cruzam dentro: [grande, dentro, dentro que cruza] */
+  grande2inter: [
+    {g:['pessoas','médicos','mulheres'], obs:'Existem médicas — por isso os dois círculos se cruzam.'},
+    {g:['veículos','carros','veículos elétricos']},
+    {g:['animais','aves','animais de estimação']},
+    {g:['alimentos','frutas','sobremesas']}
+  ],
+  /* aninhado + terceiro que cruza só o externo: [externo, interno, terceiro] */
+  nestedInter: [
+    {g:['plantas','árvores','alimentos'], obs:'Parte dos alimentos é planta (verduras, grãos), mas a árvore em si não é alimento.'},
+    {g:['aves','pinguins','animais que voam'], obs:'Pinguim é ave, mas não voa.'},
+    {g:['veículos','motos','coisas com quatro rodas']}
+  ],
+  /* pequeno dentro da interseção: [A, B, pequeno] */
+  pequenoNaInter: [
+    {g:['instrumentos musicais','objetos de madeira','violões']},
+    {g:['aves','animais de estimação','papagaios']},
+    {g:['coisas doces','frutas','mangas']},
+    {g:['profissionais de saúde','mulheres','enfermeiras']},
+    {g:['veículos','coisas que voam','aviões']}
+  ],
+  /* corrente: [ponta, meio, ponta] */
+  cadeia: [
+    {g:['crianças','estudantes','aposentados'], obs:'Há quem volte a estudar depois de aposentado, mas nenhuma criança é aposentada.'},
+    {g:['carros','veículos elétricos','bicicletas']},
+    {g:['homens','brasileiros','mulheres']},
+    {g:['cães','animais de estimação','gatos']}
+  ]
+};
+
+/* explicação estrutural de cada configuração, montada com os grupos do item */
+const EXPLICA_D = {
+  separados3:     g => 'Nada pertence a dois desses grupos ao mesmo tempo: três círculos totalmente separados. O tamanho desenhado de cada um não importa.',
+  concentricos3:  g => 'Encaixe triplo: '+g[2]+' está dentro de '+g[1]+', que por sua vez está dentro de '+g[0]+'. Do grupo mais amplo para o mais específico.',
+  nestedSep:      g => g[1]+' está inteiramente dentro de '+g[0]+'. '+cap(g[2])+' fica de fora, sem nada em comum com os outros dois.',
+  inter2Sep:      g => g[0]+' e '+g[1]+' têm parte em comum, mas nenhum contém o outro: dois círculos que se cruzam. '+cap(g[2])+' não encosta em nenhum dos dois.',
+  inter3:         g => 'Os três se cruzam dois a dois e ainda há quem esteja nos três ao mesmo tempo. Nenhum grupo está contido em outro.',
+  grande2dentro:  g => g[1]+' e '+g[2]+' estão dentro de '+g[0]+', e não têm nada em comum entre si: dois círculos separados dentro do maior.',
+  grande2inter:   g => g[1]+' e '+g[2]+' estão dentro de '+g[0]+' e têm parte em comum entre si: dois círculos que se cruzam dentro do maior.',
+  nestedInter:    g => g[1]+' está dentro de '+g[0]+'. '+cap(g[2])+' tem parte em comum com '+g[0]+', mas não chega a tocar '+g[1]+'.',
+  pequenoNaInter: g => g[0]+' e '+g[1]+' se cruzam. '+cap(g[2])+' pertence aos dois ao mesmo tempo, então cabe inteiro na área comum.',
+  cadeia:         g => g[1]+' tem parte em comum com '+g[0]+' e também com '+g[2]+'. Mas '+g[0]+' e '+g[2]+' não têm nada em comum: as pontas da corrente não se tocam.'
+};
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+const CONFIGS_D = Object.keys(BANCO_D);
+
+function sortearDiagramas(){
+  /* uma questão de cada tipo de relação, com exemplo sorteado dentro do tipo */
+  return embaralhar(CONFIGS_D).map(cfg => {
+    const item = sortear(BANCO_D[cfg]);
+    const distratores = embaralhar(CONFIGS_D.filter(c => c !== cfg)).slice(0,4);
+    return {
+      certa: cfg,
+      grupos: embaralhar(item.g),
+      rotulos: item.g,
+      opcoes: embaralhar([cfg].concat(distratores)),
+      txt: EXPLICA_D[cfg](item.g) + (item.obs ? ' ' + item.obs : '')
+    };
+  });
+}
+
+/* =====================================================================
+   Gerador de matrizes — cada regra vira uma matriz nova a cada sorteio
+   ===================================================================== */
+const FORMAS = ['sq','tri','cir','dia'];
+const TAMS = [11,17,24];
+const NOME = {sq:'quadrado', tri:'triângulo', cir:'círculo', dia:'losango'};
+const NOMES = {sq:'quadrados', tri:'triângulos', cir:'círculos', dia:'losangos'};
+const ORD = ['primeira','segunda','terceira'];
+function tresFormas(){ return embaralhar(FORMAS).slice(0,3); }
+
+const REGRAS = [
+  /* 1. mesma forma na linha, tamanho muda na coluna */
+  function(){
+    const f = tresFormas(), dec = rand() < .5;
+    const tam = dec ? [24,17,11] : [11,17,24];
+    const cels = f.map(sh => tam.map(sz => ({sh:sh, sz:sz})));
+    const certa = cels[2][2]; cels[2][2] = null;
+    return {cels:cels, certa:certa, regra:'Cada linha repete a mesma forma e o tamanho '+(dec?'diminui':'aumenta')+' da esquerda para a direita. A última linha é a dos '+NOMES[f[2]]+': falta o '+NOME[f[2]]+(dec?' pequeno':' grande')+', vazado como os outros.'};
   },
-  {
-    grupos:['bombons','doces','coisas de comer'],
-    certa:'concentricos3',
-    rotulos:['coisas de comer','doces','bombons'],
-    opcoes:['concentricos3','nestedSep','grande2dentro','inter2Sep','pequenoNaInter'],
-    txt:'São três grupos encaixados: todo bombom é um doce e todo doce é uma coisa de comer. Um dentro do outro, do mais amplo para o mais específico.'
+  /* 2. preenchimento em uma das colunas */
+  function(){
+    const f = tresFormas(), col = 1 + rnd(2);
+    const cels = f.map(sh => [0,1,2].map(c => ({sh:sh, sz:17, fill:c===col?1:0})));
+    const certa = cels[2][2]; cels[2][2] = null;
+    return {cels:cels, certa:certa, regra:'A forma e o tamanho não mudam dentro da linha; o que muda é o preenchimento — só a '+ORD[col]+' coluna é pintada. Falta o '+NOME[f[2]]+(col===2?' pintado':' vazado')+'.'};
   },
-  {
-    grupos:['pássaros','animais de estimação','pedras'],
-    certa:'inter2Sep',
-    rotulos:['pássaros','animais de estimação','pedras'],
-    opcoes:['inter2Sep','grande2inter','separados3','nestedSep','cadeia'],
-    txt:'Alguns pássaros são animais de estimação e alguns não: os dois círculos se cruzam, mas nenhum contém o outro. Nenhuma pedra é pássaro nem animal de estimação, então ela fica de fora.'
+  /* 3. quantidade */
+  function(){
+    const f = tresFormas(), cres = rand() < .5;
+    const ns = cres ? [1,2,3] : [3,2,1];
+    const cels = f.map(sh => ns.map(n => ({sh:sh, sz:17, n:n})));
+    const certa = cels[2][2]; cels[2][2] = null;
+    return {cels:cels, certa:certa, regra:'O que muda na linha é a quantidade: '+(cres?'uma, duas, três':'três, duas, uma')+'. A forma é a mesma na linha inteira, então falta '+(cres?'três '+NOMES[f[2]]:'um '+NOME[f[2]])+'.'};
   },
-  {
-    grupos:['cães','gatos','animais'],
-    certa:'grande2dentro',
-    rotulos:['animais','cães','gatos'],
-    opcoes:['grande2dentro','grande2inter','concentricos3','inter3','nestedSep'],
-    txt:'Cães e gatos são animais, então os dois círculos ficam dentro do círculo maior. Como nenhum cão é gato, eles não se tocam.'
+  /* 4. quadrado latino */
+  function(){
+    const f = tresFormas();
+    const cels = [0,1,2].map(r => [0,1,2].map(c => ({sh:f[(c+r)%3], sz:17})));
+    const certa = cels[2][2]; cels[2][2] = null;
+    return {cels:cels, certa:certa, regra:'As três formas aparecem uma vez em cada linha e uma vez em cada coluna. Na última célula falta a única que não apareceu nem na linha nem na coluna: o '+NOME[certa.sh]+'.'};
   },
-  {
-    grupos:['médicos','mulheres','pessoas'],
-    certa:'grande2inter',
-    rotulos:['pessoas','médicos','mulheres'],
-    opcoes:['grande2inter','grande2dentro','inter3','concentricos3','pequenoNaInter'],
-    txt:'Médicos e mulheres são pessoas: os dois círculos ficam dentro do maior. E existem médicas — logo, eles se cruzam, sem que um contenha o outro.'
+  /* 5. giro do triângulo + tamanho por linha */
+  function(){
+    const rots = rand() < .5 ? [0,120,240] : [0,240,120];
+    const tam = embaralhar(TAMS);
+    const cels = tam.map(sz => rots.map(r => ({sh:'tri', sz:sz, rot:r})));
+    const certa = cels[2][2]; cels[2][2] = null;
+    return {cels:cels, certa:certa, regra:'Duas regras ao mesmo tempo: o tamanho é constante em cada linha e o triângulo gira um terço de volta a cada coluna. Falta o triângulo do tamanho da última linha, na terceira posição de giro.'};
   },
-  {
-    grupos:['árvores','plantas','alimentos'],
-    certa:'nestedInter',
-    rotulos:['plantas','árvores','alimentos'],
-    opcoes:['nestedInter','grande2inter','inter3','nestedSep','cadeia'],
-    txt:'Toda árvore é planta: um círculo dentro do outro. Parte dos alimentos é planta (verduras, grãos), então alimentos cruza o círculo das plantas — mas não chega a tocar o das árvores, porque a árvore em si não é alimento.'
+  /* 6. forma pela coluna, tamanho pela linha */
+  function(){
+    const f = tresFormas(), tam = embaralhar(TAMS);
+    const cels = tam.map(sz => f.map(sh => ({sh:sh, sz:sz})));
+    const certa = cels[2][2]; cels[2][2] = null;
+    return {cels:cels, certa:certa, regra:'A coluna manda na forma e a linha manda no tamanho. O cruzamento que falta é o '+NOME[f[2]]+' do tamanho da última linha.'};
   },
-  {
-    grupos:['cavalos','peixes','aves'],
-    certa:'separados3',
-    rotulos:['cavalos','peixes','aves'],
-    opcoes:['separados3','inter3','grande2dentro','cadeia','concentricos3'],
-    txt:'Nenhum animal está em dois desses grupos ao mesmo tempo. Três círculos totalmente separados — o tamanho de cada um não importa.'
+  /* 7. tamanho pela coluna, preenchimento pela linha */
+  function(){
+    const f = tresFormas(), dec = rand() < .5;
+    const tam = dec ? [24,17,11] : [11,17,24];
+    const cels = f.map((sh,r) => tam.map(sz => ({sh:sh, sz:sz, fill:r===2?1:0})));
+    const certa = cels[2][2]; cels[2][2] = null;
+    return {cels:cels, certa:certa, regra:'O tamanho vem da coluna ('+(dec?'diminui':'aumenta')+' para a direita) e o preenchimento vem da linha: só a última linha é pintada. Falta o '+NOME[f[2]]+(dec?' pequeno':' grande')+' pintado.'};
   },
-  {
-    grupos:['violões','instrumentos musicais','objetos de madeira'],
-    certa:'pequenoNaInter',
-    rotulos:['instrumentos musicais','objetos de madeira','violões'],
-    opcoes:['pequenoNaInter','inter3','grande2inter','nestedInter','concentricos3'],
-    txt:'Há instrumentos que não são de madeira e objetos de madeira que não são instrumentos: os dois círculos se cruzam. O violão é as duas coisas ao mesmo tempo, então cabe inteiro dentro da área comum.'
-  },
-  {
-    grupos:['crianças','estudantes','aposentados'],
-    certa:'cadeia',
-    rotulos:['crianças','estudantes','aposentados'],
-    opcoes:['cadeia','inter3','separados3','grande2inter','nestedSep'],
-    txt:'Estudantes cruza com crianças e também com aposentados (há quem volte a estudar). Mas nenhuma criança é aposentada: as pontas da corrente não se tocam.'
-  },
-  {
-    grupos:['políticos','advogados','mentirosos'],
-    certa:'inter3',
-    rotulos:['políticos','advogados','mentirosos'],
-    opcoes:['inter3','pequenoNaInter','grande2inter','cadeia','inter2Sep'],
-    txt:'Nenhum grupo está contido em outro e todos os cruzamentos existem: há advogados que são políticos, políticos que mentem, advogados que mentem — e quem é as três coisas. Três círculos que se cruzam dois a dois.'
+  /* 8. forma pela coluna, quantidade pela linha */
+  function(){
+    const f = tresFormas();
+    const cels = [0,1,2].map(r => f.map(sh => ({sh:sh, sz:17, n:r+1})));
+    const certa = cels[2][2]; cels[2][2] = null;
+    return {cels:cels, certa:certa, regra:'A coluna manda na forma e a linha manda na quantidade: uma, duas, três. Falta três '+NOMES[f[2]]+'.'};
   }
 ];
 
-const MATRIZES = [
-  {
-    cels:[
-      [{sh:'sq',sz:24},{sh:'sq',sz:17},{sh:'sq',sz:11}],
-      [{sh:'tri',sz:24},{sh:'tri',sz:17},{sh:'tri',sz:11}],
-      [{sh:'cir',sz:24},{sh:'cir',sz:17},null]
-    ],
-    opcoes:[{sh:'cir',sz:11},{sh:'cir',sz:17},{sh:'cir',sz:24},{sh:'sq',sz:11},{sh:'tri',sz:11},{sh:'cir',sz:11,fill:1}],
-    ans:0,
-    regra:'Cada linha mantém a mesma forma e ela vai diminuindo da esquerda para a direita. A linha dos círculos termina no círculo pequeno, vazado como todos os outros.'
-  },
-  {
-    cels:[
-      [{sh:'sq',sz:17},{sh:'sq',sz:17},{sh:'sq',sz:17,fill:1}],
-      [{sh:'tri',sz:17},{sh:'tri',sz:17},{sh:'tri',sz:17,fill:1}],
-      [{sh:'cir',sz:17},{sh:'cir',sz:17},null]
-    ],
-    opcoes:[{sh:'cir',sz:17,fill:1},{sh:'cir',sz:17},{sh:'sq',sz:17,fill:1},{sh:'tri',sz:17,fill:1},{sh:'cir',sz:11,fill:1},{sh:'cir',sz:24,fill:1}],
-    ans:0,
-    regra:'A forma e o tamanho não mudam dentro da linha; o que muda é o preenchimento: só a terceira coluna é pintada. Falta o círculo pintado, do mesmo tamanho dos outros dois.'
-  },
-  {
-    cels:[
-      [{sh:'cir',n:1,sz:17},{sh:'cir',n:2},{sh:'cir',n:3}],
-      [{sh:'sq',n:1,sz:17},{sh:'sq',n:2},{sh:'sq',n:3}],
-      [{sh:'tri',n:1,sz:17},{sh:'tri',n:2},null]
-    ],
-    opcoes:[{sh:'tri',n:3},{sh:'tri',n:2},{sh:'sq',n:3},{sh:'cir',n:3},{sh:'tri',n:1,sz:17},{sh:'tri',n:3,fill:1}],
-    ans:0,
-    regra:'Aqui o que conta é a quantidade: um, dois, três. A forma é a mesma na linha inteira, então a célula que falta tem três triângulos vazados.'
-  },
-  {
-    cels:[
-      [{sh:'sq',sz:17},{sh:'tri',sz:17},{sh:'cir',sz:17}],
-      [{sh:'tri',sz:17},{sh:'cir',sz:17},{sh:'sq',sz:17}],
-      [{sh:'cir',sz:17},{sh:'sq',sz:17},null]
-    ],
-    opcoes:[{sh:'tri',sz:17},{sh:'sq',sz:17},{sh:'cir',sz:17},{sh:'tri',sz:17,fill:1},{sh:'dia',sz:17},{sh:'tri',sz:11}],
-    ans:0,
-    regra:'As três formas aparecem uma vez em cada linha e uma vez em cada coluna. Na última linha já saíram círculo e quadrado, e a última coluna ainda não teve triângulo: é ele que falta.'
-  },
-  {
-    cels:[
-      [{sh:'tri',sz:24},{sh:'tri',sz:24,rot:120},{sh:'tri',sz:24,rot:240}],
-      [{sh:'tri',sz:17},{sh:'tri',sz:17,rot:120},{sh:'tri',sz:17,rot:240}],
-      [{sh:'tri',sz:11},{sh:'tri',sz:11,rot:120},null]
-    ],
-    opcoes:[{sh:'tri',sz:11,rot:240},{sh:'tri',sz:11,rot:120},{sh:'tri',sz:11},{sh:'tri',sz:17,rot:240},{sh:'tri',sz:24,rot:240},{sh:'tri',sz:11,rot:240,fill:1}],
-    ans:0,
-    regra:'Duas regras ao mesmo tempo: o tamanho é constante em cada linha (grande, médio, pequeno) e o triângulo gira um terço de volta a cada coluna. Falta o triângulo pequeno na terceira posição de giro.'
-  },
-  {
-    cels:[
-      [{sh:'tri',sz:11},{sh:'cir',sz:11},{sh:'sq',sz:11}],
-      [{sh:'tri',sz:17},{sh:'cir',sz:17},{sh:'sq',sz:17}],
-      [{sh:'tri',sz:24},{sh:'cir',sz:24},null]
-    ],
-    opcoes:[{sh:'sq',sz:24},{sh:'sq',sz:17},{sh:'cir',sz:24},{sh:'tri',sz:24},{sh:'sq',sz:24,fill:1},{sh:'sq',sz:11}],
-    ans:0,
-    regra:'A coluna manda na forma (triângulo, círculo, quadrado) e a linha manda no tamanho, que cresce de cima para baixo. O cruzamento que falta é o quadrado grande.'
-  }
-];
+/* chave visual: só o que se enxerga no desenho entra na comparação */
+function chave(sp){
+  const n = sp.n || 1;
+  return [sp.sh, n > 1 ? 0 : sp.sz, sp.fill?1:0, n, sp.sh==='tri' ? (sp.rot||0) : 0].join('|');
+}
+
+function distratores(certa){
+  const cand = [], k0 = chave(certa), n = certa.n || 1;
+  const add = mud => {
+    const s = Object.assign({}, certa, mud);
+    if(chave(s) !== k0) cand.push(s);
+  };
+  FORMAS.filter(f => f !== certa.sh).forEach(f => add({sh:f}));
+  if(n === 1) TAMS.filter(t => t !== certa.sz).forEach(t => add({sz:t}));
+  add({fill: certa.fill ? 0 : 1});
+  [1,2,3].filter(x => x !== n).forEach(x => add({n:x}));
+  if(certa.sh === 'tri') [0,120,240].filter(r => r !== (certa.rot||0)).forEach(r => add({rot:r}));
+  const vistos = {}, unicos = [];
+  cand.forEach(c => { const k = chave(c); if(!vistos[k]){ vistos[k] = 1; unicos.push(c); } });
+  return embaralhar(unicos).slice(0,5);
+}
+
+function sortearMatrizes(qtd){
+  return embaralhar(REGRAS).slice(0,qtd).map(gerar => {
+    const m = gerar();
+    const opcoes = embaralhar([{sp:m.certa, ok:true}].concat(distratores(m.certa).map(sp => ({sp:sp, ok:false}))));
+    return {cels:m.cels, regra:m.regra, opcoes:opcoes, certaSpec:m.certa};
+  });
+}
 
 /* =====================================================================
    Montagem e interação
    ===================================================================== */
 const estado = [];
-
-function embaralhar(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
-  return a;
-}
 
 function legendaHTML(rotulos){
   return '<ul class="legend">' + rotulos.map(r => '<li><i></i><b>'+r+'</b></li>').join('') + '</ul>';
@@ -548,33 +643,31 @@ function rodape(){
 }
 
 function montarDiagrama(q, n){
-  const ordem = embaralhar(q.opcoes);
   const el = document.createElement('article');
   el.className = 'q';
   el.innerHTML =
     '<div class="q-head"><span class="q-num">D'+String(n).padStart(2,'0')+'</span>' +
       '<div><p class="q-ask">Qual diagrama representa melhor a relação entre estes grupos?</p>' +
       '<div class="grupos">'+q.grupos.map(g => '<span>'+g+'</span>').join('')+'</div></div></div>' +
-    blocoOpcoes(ordem.map(id => figSVG(id,false))) +
+    blocoOpcoes(q.opcoes.map(id => figSVG(id,false))) +
     rodape() +
     '<div class="explica" hidden><div class="fig-box">'+figSVG(q.certa,true)+'</div>' +
       '<div class="txt"><p>'+q.txt+'</p>'+legendaHTML(q.rotulos)+'</div></div>';
-  return { el:el, certa:ordem.indexOf(q.certa) };
+  return { el:el, certa:q.opcoes.indexOf(q.certa) };
 }
 
 function montarMatriz(q, n){
-  const pares = embaralhar(q.opcoes.map((sp,i) => ({sp:sp, ok:i === q.ans})));
   const el = document.createElement('article');
   el.className = 'q';
   el.innerHTML =
     '<div class="q-head"><span class="q-num">M'+String(n).padStart(2,'0')+'</span>' +
       '<div><p class="q-ask">Qual desenho completa a matriz no lugar do ponto de interrogação?</p></div></div>' +
     '<div class="matriz-wrap">'+matrizSVG(q.cels)+'</div>' +
-    blocoOpcoes(pares.map(p => celulaSVG(p.sp)), 'cell') +
+    blocoOpcoes(q.opcoes.map(o => celulaSVG(o.sp)), 'cell') +
     rodape() +
-    '<div class="explica" hidden><div class="fig-box" style="width:76px">'+celulaSVG(q.opcoes[q.ans])+'</div>' +
+    '<div class="explica" hidden><div class="fig-box" style="width:76px">'+celulaSVG(q.certaSpec)+'</div>' +
       '<div class="txt"><p>'+q.regra+'</p></div></div>';
-  return { el:el, certa:pares.findIndex(p => p.ok) };
+  return { el:el, certa:q.opcoes.findIndex(o => o.ok) };
 }
 
 function ligar(item){
@@ -615,7 +708,7 @@ function atualizar(){
   const erros  = corrigidas.length - certas;
   document.getElementById('barra').style.width = (respondidas/estado.length*100)+'%';
   document.getElementById('contador').innerHTML =
-    '<b>'+respondidas+'</b>/'+estado.length+' respondidas &middot; <b>'+certas+'</b> certas';
+    '<b>'+respondidas+'</b>/'+estado.length+' feitas &middot; <b>'+certas+'</b> certas';
   document.getElementById('p-cert').textContent = certas;
   document.getElementById('p-err').textContent  = erros;
   document.getElementById('p-pend').textContent = estado.length - corrigidas.length;
@@ -623,17 +716,31 @@ function atualizar(){
     corrigidas.length ? Math.round(certas/corrigidas.length*100)+'%' : '—';
 }
 
-function construir(){
+/* ---- prova: código, sorteio e construção ---- */
+function codigoDaURL(){
+  const m = /p=(\d{4})/.exec(location.hash);
+  return m ? m[1] : null;
+}
+function novoCodigo(){
+  return String(1000 + Math.floor(Math.random()*9000));
+}
+
+function construir(codigo){
+  rand = mulberry32(Number(codigo));
+  document.getElementById('codigo').textContent = codigo;
+  history.replaceState(null, '', '#p=' + codigo);
+
   const listaD = document.getElementById('lista-d');
   const listaM = document.getElementById('lista-m');
   listaD.innerHTML = ''; listaM.innerHTML = '';
   estado.length = 0;
-  DIAGRAMAS.forEach((q,i) => {
+
+  sortearDiagramas().forEach((q,i) => {
     const item = montarDiagrama(q, i+1);
     item.escolha = null; item.corrigida = false;
     listaD.appendChild(item.el); estado.push(item); ligar(item);
   });
-  MATRIZES.forEach((q,i) => {
+  sortearMatrizes(6).forEach((q,i) => {
     const item = montarMatriz(q, i+1);
     item.escolha = null; item.corrigida = false;
     listaM.appendChild(item.el); estado.push(item); ligar(item);
@@ -641,21 +748,26 @@ function construir(){
   atualizar();
 }
 
-/* exemplos das instruções */
+/* exemplos fixos das instruções */
+const EXEMPLO = [
+  [{sh:'sq',sz:24},{sh:'sq',sz:17},{sh:'sq',sz:11}],
+  [{sh:'tri',sz:24},{sh:'tri',sz:17},{sh:'tri',sz:11}],
+  [{sh:'cir',sz:24},{sh:'cir',sz:17},null]
+];
 document.getElementById('demo-a').innerHTML =
   figSVG('concentricos2', true) + legendaHTML(['animais','gatos']);
 document.getElementById('demo-b').innerHTML =
-  '<div style="width:130px">'+matrizSVG(MATRIZES[0].cels)+'</div>' +
-  '<div><div style="width:44px;color:var(--fig1)">'+celulaSVG(MATRIZES[0].opcoes[0])+'</div>' +
+  '<div style="width:130px">'+matrizSVG(EXEMPLO)+'</div>' +
+  '<div><div style="width:44px;color:var(--fig1)">'+celulaSVG({sh:'cir',sz:11})+'</div>' +
   '<p class="eyebrow" style="margin:6px 0 0">resposta</p></div>';
 
 document.getElementById('btn-corrigir').addEventListener('click', () => estado.forEach(corrigir));
-document.getElementById('btn-reiniciar').addEventListener('click', () => {
-  construir();
+document.getElementById('btn-novo').addEventListener('click', () => {
+  construir(novoCodigo());
   window.scrollTo({top:0, behavior:'smooth'});
 });
 
-construir();
+construir(codigoDaURL() || novoCodigo());
 </script>
 </body>
 </html>
